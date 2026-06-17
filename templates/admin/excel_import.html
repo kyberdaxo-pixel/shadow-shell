@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="cyber-card" style="padding: 20px; background: #111827; color: white; border-radius: 8px;">
+    <h2>📊 Excel (.xlsx) orqali foydalanuvchilar bazasini yuklash</h2>
+    <p style="color: #9ca3af; margin-bottom: 20px;">Excel fayl ustunlari tartibi: <b>username | email | password | level | xp</b> bo'lishi shart.</p>
+    <form action="." method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Yuklashni boshlash" style="background: #00bcff; color: black; padding: 10px 20px; border: 0; cursor: pointer; font-weight: bold; border-radius: 4px;">
+    </form>
+</div>
+{% endblock %}

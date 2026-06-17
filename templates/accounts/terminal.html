@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowShell // Live Sandbox Core</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.8.0/lib/addon-fit.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #05080c;
+            --border-color: #0f3d3e;
+            --neon-green: #00ff66;
+            --neon-cyan: #00f0ff;
+            --neon-red: #ff3366;
+            --text-muted: #4e6177;
+            --panel-bg: rgba(10, 17, 26, 0.75);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #e2e8f0;
+            font-family: 'Fira Code', monospace;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 0),
+                radial-gradient(rgba(0, 255, 102, 0.02) 2px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Yuqori StatusBar */
+        .top-bar {
+            background: #070c14;
+            border-bottom: 2px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        .brand {
+            color: var(--neon-cyan);
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+        }
+
+        .status-indicator {
+            color: var(--neon-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Asosiy Ishchi Muhit Split Screen */
+        .workspace {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 46px);
+        }
+
+        /* Chap Panel: Topshiriqlar */
+        .task-panel {
+            width: 35%;
+            background: var(--panel-bg);
+            border-right: 2px solid var(--border-color);
+            padding: 25px;
+            overflow-y: auto;
+            backdrop-filter: blur(4px);
+        }
+
+        .panel-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-cyan);
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .task-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--neon-cyan);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .task-card.active {
+            border-left-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--neon-cyan);
+        }
+
+        .task-card.active .badge {
+            background: rgba(0, 255, 102, 0.2);
+            color: var(--neon-green);
+        }
+
+        .instruction-box {
+            margin-top: 20px;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .instruction-box h4 {
+            color: var(--neon-red);
+            margin-bottom: 5px;
+        }
+
+        /* O'ng Panel: Terminal Grafikasi */
+        .terminal-panel {
+            width: 65%;
+            padding: 20px;
+            background: rgba(5, 8, 12, 0.95);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            padding: 8px 15px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--text-muted);
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .dot-r { background: #ef4444; }
+        .dot-y { background: #eab308; }
+        .dot-g { background: #22c55e; }
+
+        /* Xterm konteyneri */
+        #terminal-container {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            background-color: #000000 !important;
+            padding: 10px;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            box-shadow: inset 0 0 20px rgba(0, 255, 102, 0.05);
+        }
+
+        /* Animatsiyalar */
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 15px var(--neon-green); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Scrollbar'larni chiroyli qilish */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #05080c; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+    </style>
+</head>
+<body>
+<div class="top-bar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="brand">⚡ SHADOWSHELL // SANDBOX_V1</div>
+        <a href="/dashboard/" style="background: #0f3d3e; color: #00ff66; border: 1px solid #00ff66; padding: 5px 15px; text-decoration: none; border-radius: 4px; font-family: 'Share Tech Mono', sans-serif; font-size: 0.9rem; transition: 0.3s;" onmouseover="this.style.background='#00ff66'; this.style.color='#000';" onmouseout="this.style.background='#0f3d3e'; this.style.color='#00ff66';">
+            ⬅️ DASHBOARD
+        </a>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 25px; font-family: 'Share Tech Mono', monospace;">
+        <div style="color: var(--neon-cyan)">EXP: <span id="exp-counter" style="color: #fff; font-weight: bold;">0</span></div>
+        <div style="color: #eab308">COMMANDS: <span id="cmd-counter" style="color: #fff;">0</span></div>
+        <div class="status-indicator">
+            <div class="pulse-dot"></div>
+            <span id="status-text">SECURE TUNNEL UP</span>
+        </div>
+    </div>
+</div>
+
+<div id="achievement-toast" style="position: fixed; bottom: 20px; right: 20px; background: rgba(10, 17, 26, 0.95); border: 2px solid #eab308; box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); padding: 15px; border-radius: 6px; display: none; z-index: 9999; width: 300px; font-family: 'Fira Code', monospace;">
+    <div id="ach-title" style="color: #eab308; font-weight: bold; margin-bottom: 5px;"></div>
+    <div id="ach-desc" style="color: #cbd5e1; font-size: 0.85rem;"></div>
+</div>
+
+<script>
+    // Eski WebSocket qismini mana bu JSON qayta ishlovchi drayverga almashtiramiz:
+    let totalExp = 0;
+    let totalCmds = 0;
+
+    socket.onmessage = (event) => {
+        try {
+            const res = JSON.parse(event.data);
+            
+            // 1. Terminal oqimini chiqarish
+            if (res.event === "terminal") {
+                term.write(res.data);
+                // Har bir yozilgan simvolda buyruqni tekshirish uchun frontend hisoblagich
+                if (res.data.includes("\r") || res.data.includes("\n")) {
+                    totalCmds++;
+                    document.getElementById("cmd-counter").innerText = totalCmds;
+                }
+            }
+            
+            // 2. Topshiriq muvaffaqiyatli bajarilganda
+            if (res.event === "task_complete") {
+                // O'sha topshiriq kartasini topamiz
+                const taskCard = document.querySelector(`.task-card:nth-child(${res.task_id + 1})`);
+                if (taskCard) {
+                    // Animatsiya bilan o'chirish (yo'qotish)
+                    taskCard.style.transition = "all 0.5s ease";
+                    taskCard.style.opacity = "0";
+                    taskCard.style.transform = "translateX(-100%)";
+                    setTimeout(() => {
+                        taskCard.remove(); // Tizimdan butunlay yo'qotish
+                        
+                        // Keyingi topshiriqni ochish
+                        if (res.next_task_id) {
+                            const nextCard = document.querySelector(`.task-card:nth-child(${res.next_task_id + 1})`);
+                            if (nextCard) {
+                                nextCard.classList.add("active");
+                                nextCard.querySelector(".badge").innerText = "FAOL";
+                                nextCard.querySelector(".badge").style.background = "rgba(0, 255, 102, 0.2)";
+                                nextCard.querySelector(".badge").style.color = "var(--neon-green)";
+                            }
+                        }
+                    }, 500);
+                }
+                
+                // EXPni yangilash
+                totalExp += res.exp;
+                document.getElementById("exp-counter").innerText = totalExp;
+                
+                // Terminalga kiber-tabrik yozish
+                term.write(`\r\n\x1b[1;32m🎉 [SUCCESS]: Topshiriq bajarildi! +${res.exp} EXP tizimga yuklandi.\x1b[0m\r\n`);
+            }
+            
+            // 3. Avtomatik Yutuq (Achievement) olganda
+            if (res.event === "achievement") {
+                const toast = document.getElementById("achievement-toast");
+                document.getElementById("ach-title").innerText = res.title;
+                document.getElementById("ach-desc").innerText = res.desc;
+                
+                toast.style.display = "block";
+                // 4 soniyadan keyin g'oyib bo'ladi
+                setTimeout(() => { toast.style.display = "none"; }, 4000);
+                
+                term.write(`\r\n\x1b[1;33m${res.title} UNVONI QO'LGA KIRITILDI!\x1b[0m\r\n`);
+            }
+
+        } catch (e) {
+            // Agar JSON bo'lmasa oddiy matn deb o'qiymiz (eski loglar uchun)
+            term.write(event.data);
+        }
+    };
+</script>
+        <div class="workspace">
+            
+            <div style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+        <div id="terminal-container" style="height: 500px; background: #050b14;"></div>
+
+        <div id="quest-sidebar" style="background: #0a111a; border: 1px solid #0f3d3e; padding: 20px; border-radius: 4px;">
+            {% if active_quest %}
+                <h3 style="color: #00f0ff; font-family: 'JetBrains Mono', monospace;">🎯 Faol Topshiriq</h3>
+                <h4 style="color: #fff;">{{ active_quest.title }}</h4>
+                <p style="color: #64748b; font-size: 0.9rem;">{{ active_quest.description }}</p>
+                
+                <input type="hidden" id="active-quest-id" value="{{ active_quest.id }}">
+            {% else %}
+                <p style="color: var(--text-muted); text-align: center; font-style: italic; margin-top: 50%;">Hozircha faol topshiriq tanlanmagan yoki hamma topshiriqlar bajarilgan.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+    // Terminalda Enter bosilganda JS orqali API ga tekshirishga so'rov yuborish mantiqi:
+    // ... terminal buyrug'ini ushlab olish ...
+    function checkCommandOnBackend(commandText) {
+        const questId = document.getElementById('active-quest-id')?.value;
+        if (!questId) return;
+
+        fetch('/courses/verify-command/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `quest_id=${questId}&command=${encodeURIComponent(commandText)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                term.write(`\r\n\x1b[32m${data.message}\x1b[m\r\n`);
+                // Topshiriq panelini yashirish (G'oyib qilish)
+                document.getElementById('quest-sidebar').innerHTML = '<p style="color: #00ff66; text-align:center; margin-top:50%;">🎉 Topshiriq bajarildi va ro\'yxatdan o\'chirildi!</p>';
+            }
+        });
+    }
+    </script>
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <div class="window-dots">
+                    <div class="dot dot-r"></div>
+                    <div class="dot dot-y"></div>
+                    <div class="dot dot-g"></div>
+                </div>
+                <div>king@shadowshell:~ (alpine-sh)</div>
+                <div style="color: var(--neon-cyan)">PORT: 8000</div>
+            </div>
+            
+            <div id="terminal-container"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Terminalni neon-xaker uslubida sozlash
+        // terminal.html ichidagi xterm instansiyasi konfiguratsiyasi
+        const term = new Terminal({
+            cursorBlink: true,
+            theme: { background: '#050b14', foreground: '#00ff66' }
+        });
+        term.open(document.getElementById('terminal-container'));
+
+        // 🔥 Kiritishni faollashtirish (Yozuv yozish uchun):
+        term.onData(data => {
+            // Agar WebSocket ishlatsangiz: socket.send(data);
+            // Agar simulyatsiya bo'lsa, xarakterni ekranga chiqarish:
+            if (data === '\r') { // Enter bosilganda
+                term.write('\r\nking@shadowshell:~$ ');
+            } else if (data === '\u007F') { // Backspace
+                term.write('\b \b');
+            } else {
+                term.write(data);
+            }
+        });
+        socket.onclose = () => {
+            term.write('\r\n\x1b[1;31m💥 [SYSTEM ERROR]: WebSocket aloqasi uzildi. Konteyner o\'chirildi.\x1b[0m\r\n');
+            statusText.innerText = "TUNNEL DOWN";
+            statusText.style.color = "#ff3366";
+            statusIndicator.style.backgroundColor = "#ff3366";
+            statusIndicator.style.boxShadow = "0 0 10px #ff3366";
+        };
+
+        // Klaviaturadan kiritilgan har bir belgini drayverga otish
+        term.onData(data => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(data);
+            }
+        });
+    </script>
+</body>
+</html>

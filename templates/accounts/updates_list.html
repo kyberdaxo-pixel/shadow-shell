@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top: 30px; font-family: 'JetBrains Mono', monospace;">
+    <h2 style="color: #fff; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;"><i class="fas fa-history"></i> PLATFORMA YANGILANISHLARI LOGI</h2>
+    {% for notif in request.user.notifications.all %}
+        <div class="cyber-card" style="margin-bottom: 20px; border-left: 4px solid {% if notif.update.update_type == 'major' %}var(--warning){% else %}var(--primary){% endif %}; background: rgba(10,15,26,0.8);">
+            <div style="display: flex; justify-content: space-between;">
+                <span style="font-weight: bold; color: #fff; font-size: 16px;">{{ notif.update.version }} — {{ notif.update.title }}</span>
+                <span style="color: var(--text-muted); font-size: 12px;">{{ notif.update.created_at|date:"Y-m-d" }}</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px; white-space: pre-line;">{{ notif.update.description }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

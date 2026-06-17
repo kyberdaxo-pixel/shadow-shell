@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Reyting - ShadowShell{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin-top: 30px;">
+    <div class="cyber-card">
+        <h2 style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-ranking-star" style="color: var(--primary);"></i> 
+            Top Xakerlar Reytingi
+        </h2>
+        <p style="color: var(--text-muted); margin-bottom: 25px;">
+            Platformadagi eng faol kiber-jangchilar ro'yxati
+        </p>
+
+            <div class="leaderboard-table">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="color: var(--neon-cyan); border-bottom: 2px solid #0f3d3e;">
+                            <th style="padding: 12px;">#</th>
+                            <th style="padding: 12px;">Xaker</th>
+                            <th style="padding: 12px;">Daraja</th>
+                            <th style="padding: 12px;">Tajriba (XP)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr style="border-bottom: 1px solid rgba(15, 61, 62, 0.3); {% if u == current_user %}background: rgba(0, 255, 102, 0.05); border-left: 3px solid #00ff66;{% endif %}">
+                            <td style="padding: 12px; color: #64748b;">{{ forloop.counter }}</td>
+                            <td style="padding: 12px; font-weight: 500;">
+                                {% if u.is_superuser %}⚡ {% endif %}{{ u.username }}
+                            </td>
+                            <td style="padding: 12px;">
+                                <span style="background: rgba(0, 255, 102, 0.1); color: #00ff66; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">
+                                    Lv.{{ u.level }}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; color: #00f0ff; font-weight: bold;">
+                                {{ u.exp }} XP
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                Hozircha tizimda hech kim yo'q.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    </div>
+</div>
+{% endblock %}

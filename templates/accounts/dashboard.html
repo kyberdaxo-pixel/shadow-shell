@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard - ShadowShell{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 20px; padding: 0 15px;">
+    
+    <!-- ⚡ TOP GRID: PROFIL VA STATISTIKA -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-bottom: 30px; align-items: start;">
+        
+        <!-- CHAP USTUN: XAKER PROFILI (Dinamik) -->
+        <div class="cyber-card" style="border-top: 3px solid {% if user.is_superuser %}var(--warning){% else %}var(--primary){% endif %}; text-align: center; padding: 30px 20px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+            
+            <!-- Avatar glowni adminlikka qarab o'zgartiramiz -->
+            <div style="width: 85px; height: 85px; border-radius: 50%; background: #0d1527; border: 2px solid {% if user.is_superuser %}var(--warning){% else %}var(--primary){% endif %}; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; box-shadow: 0 0 20px {% if user.is_superuser %}var(--warning-glow){% else %}var(--primary-glow){% endif %}; color: #ffffff; font-family: 'JetBrains Mono', monospace;">
+                {{ user.username.0|upper }}
+            </div>
+            
+            <h2 style="font-size: 24px; color: #ffffff; margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; letter-spacing: -0.5px;">{{ user.username }}</h2>
+            
+            <!-- Status/Unvon -->
+            <p style="color: {% if user.is_superuser %}var(--warning){% else %}var(--primary){% endif %}; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; font-weight: bold;">
+                {% if user.is_superuser %}
+                    ⚡ SHADOW MASTER (ROOT)
+                {% else %}
+                    💀 RECRUIT • LEVEL {{ user_profile.level|default:"1" }}
+                {% endif %}
+            </p>
+            
+            <!-- Progress Bar (Admin uchun Full / User uchun Dinamik) -->
+            <div style="background: rgba(0,0,0,0.5); border-radius: 10px; height: 10px; width: 100%; margin-bottom: 8px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div style="background: {% if user.is_superuser %}var(--warning){% else %}var(--primary){% endif %}; width: {% if user.is_superuser %}100%{% else %}35%{% endif %}; height: 100%; box-shadow: 0 0 10px {% if user.is_superuser %}var(--warning){% else %}var(--primary){% endif %}; transition: width 0.5s ease;"></div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 25px;">
+                {% if user.is_superuser %}
+                    <span>999,999 XP</span>
+                    <span>MAX LEVEL</span>
+                {% else %}
+                    <span>{{ user_profile.xp|default:"0" }} XP</span>
+                    <span>1,000 XP gacha</span>
+                {% endif %}
+            </div>
+                {% if request.user.is_superuser %}
+                <div style="margin: 20px 0; font-family: 'JetBrains Mono', monospace;">
+                    <a href="{% url 'accounts:cyber_terminal' %}" style="display: inline-flex; align-items: center; gap: 10px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); transition: all 0.3s ease;" onmouseover="this.style.background='#10b981'; this.style.color='#000'; this.style.boxShadow='0 0 25px #10b981';" onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.color='#10b981'; this.style.boxShadow='0 0 15px rgba(16, 185, 129, 0.2)';">
+                        <i class="fas fa-terminal"></i> SPAWN LIVE ISOLATED CONTAINER
+                    </a>
+                </div>
+                {% endif %}
+            <!-- Boshqaruv tugmalari -->
+            {% if user.is_superuser %}
+                <a href="{% url 'admin:index' %}" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 13px; font-weight: bold; background: var(--warning); color: #000000; border-color: var(--warning);">
+                    <i class="fas fa-sliders-h"></i> ADMIN PANELGA O'TISH
+                </a>
+            {% else %}
+                <a href="{% url 'billing:pricing' %}" class="btn btn-secondary" style="width: 100%; padding: 12px; font-size: 13px;">
+                    <i class="fas fa-gem" style="color: #00bcff;"></i> PREMIUM'GA O'TISH
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- O'NG USTUN: REAL STATISTIKA BLOKLARI -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            
+            <!-- TAJRIBA (XP) -->
+            <div class="cyber-card" style="display: flex; align-items: center; gap: 20px; padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="font-size: 36px; color: var(--accent); text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);"><i class="fas fa-bolt"></i></div>
+                <div>
+                    <div style="font-size: 26px; font-weight: bold; font-family: 'JetBrains Mono', monospace; color: #ffffff;">
+                        {% if user.is_superuser %}1,000{% else %}{{ user_profile.xp|default:"0" }}{% endif %}
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Tajriba (XP)</div>
+                </div>
+            </div>
+
+            <!-- BAJARILGAN TOPSHIRIQLAR -->
+            <div class="cyber-card" style="display: flex; align-items: center; gap: 20px; padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="font-size: 36px; color: var(--primary); text-shadow: 0 0 10px rgba(0, 188, 255, 0.3);"><i class="fas fa-bullseye"></i></div>
+                <div>
+                    <div style="font-size: 26px; font-weight: bold; font-family: 'JetBrains Mono', monospace; color: #ffffff;">
+                        {% if user.is_superuser %}42{% else %}{{ completed_tasks_count|default:"0" }}{% endif %}
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Topshiriqlar</div>
+                </div>
+            </div>
+
+            <!-- TO'G'RI JAVOBLAR ANIQLIGI -->
+            <div class="cyber-card" style="display: flex; align-items: center; gap: 20px; padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="font-size: 36px; color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.3);"><i class="fas fa-crosshairs"></i></div>
+                <div>
+                    <div style="font-size: 26px; font-weight: bold; font-family: 'JetBrains Mono', monospace; color: #ffffff;">
+                        {% if user.is_superuser %}100%{% else %}{{ user_profile.accuracy|default:"0" }}%{% endif %}
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Aniqlik Ko'rsatkichi</div>
+                </div>
+            </div>
+
+            <!-- STREAK (KETMA-KET KUNLAR) -->
+            <div class="cyber-card" style="display: flex; align-items: center; gap: 20px; padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="font-size: 36px; color: var(--warning); text-shadow: 0 0 10px rgba(255, 170, 0, 0.3);"><i class="fas fa-fire"></i></div>
+                <div>
+                    <div style="font-size: 26px; font-weight: bold; font-family: 'JetBrains Mono', monospace; color: #ffffff;">
+                        {% if user.is_superuser %}365{% else %}{{ user_profile.streak|default:"1" }}{% endif %}
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Ketma-ket Kunlar</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 👥 BOTTOM GRID: KURSLAR PROGRESSI VA ERISHILGAN YUTUQLAR -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start;">
+        
+        <!-- CHAP USTUN: REAL KURSLAR RO'YXATI -->
+        <div>
+            <div class="cyber-card" style="margin-bottom: 30px; padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border: 1px solid var(--border-color);">
+                <h3 style="font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #ffffff; font-family: 'JetBrains Mono', monospace;">
+                    <i class="fas fa-graduation-cap" style="color: var(--accent);"></i> TIZIMDAGI FAOL KURSLAR
+                </h3>
+                
+                <!-- Agar bazada darslar bo'lsa dinamik chiqarish -->
+                {% if active_courses %}
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        {% for course in active_courses %}
+                            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 15px 20px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #ffffff; margin-bottom: 4px; font-size: 16px;">{{ course.title }}</h4>
+                                    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">{{ course.description|truncatechars:80 }}</p>
+                                </div>
+                                <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; font-weight: bold;">
+                                    KIRISH
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- Bo'sh holat logi -->
+                    <div style="padding: 20px; text-align: center; background: rgba(0,0,0,0.2); border-radius: 6px; border: 1px dashed var(--border-color);">
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px; font-family: 'JetBrains Mono', monospace;">[SYSTEM]: Faol kiber darslar topilmadi.</p>
+                        <a href="{% url 'courses:course_list' %}" class="btn btn-primary" style="font-size: 13px;">
+                            <i class="fas fa-rocket"></i> Kurslar Katalogi
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- SO'NGGI FAOLIYAT (LOGS) -->
+            <div class="cyber-card" style="padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border: 1px solid var(--border-color);">
+                <h3 style="font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: #ffffff; font-family: 'JetBrains Mono', monospace;">
+                    <i class="fas fa-terminal" style="color: var(--primary);"></i> SO'NGGI TIZIM LOGLARI
+                </h3>
+                <div style="background: #050b14; padding: 15px; border-radius: 6px; border: 1px solid rgba(0, 188, 255, 0.15); font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #00ff66;">
+                    {% if user.is_superuser %}
+                        <p style="margin: 0 0 5px 0;">[<span style="color: var(--warning);">SUCCESS</span>] Auth Token verifikatsiyadan o'tdi. Tizim to'liq boshqaruv ostida.</p>
+                        <p style="margin: 0;">[<span style="color: var(--primary);">INFO</span>] Admin panel orqali XLSX import tizimi yuklanishga tayyor.</p>
+                    {% else %}
+                        <p style="margin: 0;">[<span style="color: var(--accent);">ONLINE</span>] Seans faollashdi. Topshiriqlarni bajarishni boshlashingiz mumkin.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- O'NG USTUN: REAL YUTUQLAR (ACHIEVEMENTS) -->
+        <div class="cyber-card" style="border-left: 3px solid var(--warning); padding: 25px; background: rgba(10, 15, 26, 0.75); border-radius: 8px; border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+            <h3 style="font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--warning); font-family: 'JetBrains Mono', monospace;">
+                <i class="fas fa-trophy"></i> ERISHILGAN YUTUQLAR
+            </h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Djangodagi m2m orqali kelgan real yutuqlar sikli -->
+                {% if user_achievements %}
+                    {% for item in user_achievements %}
+                        <div style="display: flex; align-items: center; gap: 15px; background: rgba(255, 170, 0, 0.04); padding: 12px 15px; border-radius: 6px; border: 1px solid rgba(255, 170, 0, 0.25);">
+                            <div style="font-size: 24px; color: var(--warning);"><i class="fas fa-award"></i></div>
+                            <div>
+                                <div style="font-size: 14px; font-weight: bold; color: #ffffff; font-family: 'JetBrains Mono', monospace;">{{ item.achievement.title }}</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">{{ item.achievement.description }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Bo'sh holat uchun standart yutuq (qulflangan) -->
+                    <div style="display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.3); padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border-color); opacity: 0.4;">
+                        <div style="font-size: 24px; color: var(--text-muted);"><i class="fas fa-lock"></i></div>
+                        <div>
+                            <div style="font-size: 14px; font-weight: bold; color: #ffffff;">Certifikat Etikal Hakker</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Hali hech qanday sertifikat yo'q.</div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- RESPONSIVE DIZAYN MOSLASHUVCHANLIGI -->
+<style>
+    @media (max-width: 992px) {
+        div[style*="grid-template-columns: 1fr 2fr"],
+        div[style*="grid-template-columns: 2fr 1fr"] {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+        }
+    }
+</style>
+{% endblock %}

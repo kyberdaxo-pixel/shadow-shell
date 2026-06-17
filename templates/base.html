@@ -1,0 +1,170 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ShadowShell - Interaktiv Kiber Xavfsizlik O'quv Platformasi">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <title>{% block title %}ShadowShell{% endblock %}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    {% if has_unread_notifications %}
+        <div style="background: #eab308; color: #000; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; font-family: 'JetBrains Mono', monospace; z-index: 10000; position: relative;">
+            ⚡ SHADOWSHELL YANGILANDI! <a href="/accounts/profile/" style="color: #000; text-decoration: underline; margin-left: 10px;">Yangi o'zgarishlarni o'qish →</a>
+        </div>
+    {% endif %}
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'accounts:dashboard' %}" class="nav-logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">Shadow<span class="text-accent">Shell</span></span>
+            </a>
+
+            {% if user.is_authenticated %}
+            <div class="nav-links">
+                <a href="{% url 'accounts:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-terminal"></i> Dashboard
+                </a>
+                <a href="{% url 'courses:course_list' %}" class="nav-link {% if 'courses' in request.path %}active{% endif %}">
+                    <i class="fas fa-book-skull"></i> Kurslar
+                </a>
+                
+                    <a href="/accounts/cyber-terminal/" class="nav-link {% if 'terminal' in request.path %}active{% endif %}" style="color: #00ff66;">                    
+                    <i class="fas fa-laptop-code"></i> Terminal
+                </a>
+                
+                <a href="{% url 'accounts:leaderboard' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">
+                    <i class="fas fa-ranking-star"></i> Reyting
+                </a>
+                <a href="{% url 'billing:pricing' %}" class="nav-link {% if 'billing' in request.path %}active{% endif %}">
+                    <i class="fas fa-gem"></i> Premium
+                </a>
+            </div>
+
+            <div class="nav-user">
+                {% if user_profile %}
+                <div class="nav-xp" style="font-family: 'JetBrains Mono', monospace;">
+                    <span class="xp-badge">⚡ {{ user_profile.xp|intcomma }} XP</span>
+                    <span class="level-badge" style="background: #00ff66; color: #000; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">Lv.{{ user_profile.level }}</span>
+                </div>
+                {% endif %}
+                <div class="nav-dropdown">
+                    <button class="nav-user-btn" id="userMenuBtn">
+                        <div class="user-avatar-small">
+                            {% if user_profile and user_profile.avatar %}
+                                <img src="{{ user_profile.avatar.url }}" alt="avatar">
+                            {% else %}
+                                <span>{{ user.username.0|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="username-text">{{ user.username }}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="userMenu">
+                        <a href="{% url 'accounts:profile' %}"><i class="fas fa-user-secret"></i> Profil</a>
+                        <a href="{% url 'accounts:dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a>
+                        {% if user.is_staff or user.is_superuser %}
+                        <a href="{% url 'accounts:shadow_admin_dashboard' %}"><i class="fas fa-cog"></i> Admin Panel</a>
+                        {% endif %}
+                        <hr style="border-color: rgba(255,255,255,0.1)">
+                        <a href="{% url 'accounts:logout' %}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Chiqish</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="nav-auth">
+                <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Kirish</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary">Ro'yxatdan o'tish</a>
+            </div>
+            {% endif %}
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" data-auto-dismiss="5000">
+            <span>{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="logo-icon">🛡️</span>
+                <span>ShadowShell</span>
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'courses:course_list' %}">Kurslar</a>
+                <a href="{% url 'accounts:leaderboard' %}">Reyting</a>
+                <a href="{% url 'billing:pricing' %}">Premium</a>
+            </div>
+            <div class="footer-copy">
+                <p>&copy; 2026 ShadowShell. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <script>
+        // Dropdown menu
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenu = document.getElementById('userMenu');
+        if (userMenuBtn && userMenu) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userMenu.classList.toggle('show');
+            });
+            document.addEventListener('click', () => {
+                userMenu.classList.remove('show');
+            });
+        }
+
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.querySelector('.nav-links');
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('show-mobile');
+            });
+        }
+
+        // Auto dismiss messages
+        document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
+            const delay = parseInt(el.dataset.autoDismiss);
+            setTimeout(() => {
+                el.style.animation = 'slideUp 0.3s ease forwards';
+                setTimeout(() => el.remove(), 300);
+            }, delay);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

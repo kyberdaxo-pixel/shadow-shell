@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course.title }} - ShadowShell{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-detail-page {
+        background: #050b14;
+        min-height: 100vh;
+        padding: 40px 20px;
+        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+    }
+    .header-box {
+        background: #0a111a;
+        border: 1px solid #0f3d3e;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    .header-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--neon-cyan, #00f0ff);
+    }
+    .back-btn {
+        color: #64748b;
+        text-decoration: none;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+    .back-btn:hover { color: #fff; }
+    .course-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2rem;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+    .quest-list-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.2rem;
+        color: #00f0ff;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+    /* Topshiriqlar Ro'yxati */
+    .quests-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .quest-row {
+        background: #0a111a;
+        border: 1px solid rgba(15, 61, 62, 0.6);
+        border-radius: 6px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.3s;
+        text-decoration: none;
+        color: inherit;
+    }
+    .quest-row:hover {
+        border-color: #00ff66;
+        background: #0d1724;
+        transform: translateX(5px);
+    }
+    .quest-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .quest-index {
+        font-family: 'JetBrains Mono', monospace;
+        background: #050b14;
+        border: 1px solid #0f3d3e;
+        color: #64748b;
+        width: 35px;
+        height: 35px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    .quest-row:hover .quest-index {
+        color: #00ff66;
+        border-color: rgba(0, 255, 102, 0.3);
+    }
+    .quest-name {
+        font-size: 1.1rem;
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .quest-meta-tags {
+        display: flex;
+        gap: 15px;
+        font-size: 0.85rem;
+        color: #64748b;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .status-badge {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+    .status-done { color: #00ff66; }
+    .status-pending { color: #eab308; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-detail-page">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        
+        <a href="{% url 'courses:course_list' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Barcha kurslarga qaytish
+        </a>
+
+        <div class="header-box">
+            <h1 class="course-title">{{ course.icon }} {{ course.title }}</h1>
+            <p style="color: #94a3b8; line-height: 1.6; font-size: 1.05rem; margin: 0;">
+                {{ course.description }}
+            </p>
+        </div>
+
+        <h2 class="quest-list-title">⚡ Laboratoriya topshiriqlari</h2>
+        
+        <div class="quests-container">
+            {% for item in quest_data %}
+                <a href="{% url 'courses:quest_detail' course.slug item.quest.slug %}" class="quest-row">
+                    <div class="quest-info">
+                        <div class="quest-index">{{ forloop.counter }}</div>
+                        <div>
+                            <div class="quest-name">{{ item.quest.title }}</div>
+                            <div class="quest-meta-tags">
+                                <span>Daraja: {{ item.quest.get_difficulty_display }}</span>
+                                <span>•</span>
+                                <span style="color: #00ff66;">⚡ +{{ item.quest.xp_reward }} XP</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-badge">
+                        {% if item.is_completed %}
+                            <span class="status-done"><i class="fas fa-check-circle"></i> BAJARILDI</span>
+                        {% else %}
+                            <span class="status-pending"><i class="fas fa-circle-notch fa-spin"></i> FAOL</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% empty %}
+                <p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">
+                    Ushbu kursga hozircha xavfsizlik topshiriqlari yuklanmagan.
+                </p>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

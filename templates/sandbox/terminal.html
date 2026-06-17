@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.19.0/css/xterm.css" />
+
+<div class="h-screen bg-gray-950 flex flex-col font-mono text-gray-300 overflow-hidden">
+    <div class="bg-black border-b border-gray-800 px-6 py-3 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <a href="/courses/" class="text-xs bg-gray-900 border border-gray-800 text-gray-400 px-3 py-1 rounded hover:text-white transition">
+                ← Boshqaruv Markaziga Qaytish
+            </a>
+            <span class="text-xs text-gray-600">|</span>
+            <span class="text-sm font-bold text-white tracking-wider">MISSIYA: {{ quest.title|default:"Linux Navigatsiyasi" }}</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="statusBadge" class="text-xs bg-yellow-950 text-yellow-500 border border-yellow-800 px-3 py-1 rounded tracking-widest uppercase">
+                Kutilmoqda...
+            </div>
+            <button id="runValidationBtn" class="text-xs bg-green-600 text-black font-bold px-4 py-1.5 rounded hover:bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)] transition uppercase">
+                Kodni Tekshirish (Run)
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+        <div class="w-1/2 p-6 border-r border-gray-800 overflow-y-auto bg-gray-900/20 space-y-4">
+            <div class="border border-green-500/30 bg-black/40 p-4 rounded">
+                <h3 class="text-xs font-bold text-green-500 tracking-wider uppercase mb-1">// NAZARIY MA'LUMOT</h3>
+                <h2 class="text-lg font-bold text-white mb-2">Fayllarni filtrlash san'ati</h2>
+                <p class="text-sm text-gray-400 leading-relaxed">
+                    Kiber-tahlil jarayonida juda katta hajmdagi log fayllari bilan ishlashga to'g'ri keladi. <code class="bg-gray-800 px-1 text-yellow-400 rounded">grep</code> buyrug'i matnli ma'lumotlar ichidan kerakli qatorlarni filtrlab chiqarish uchun eng kuchli quroldir.
+                </p>
+            </div>
+
+            <div class="border border-red-500/20 bg-red-950/10 p-4 rounded">
+                <h3 class="text-xs font-bold text-red-400 tracking-wider uppercase mb-2">🚨 KIBER-VAZIFA</h3>
+                <p class="text-sm text-gray-300 leading-relaxed">
+                    Hozirgi vaqtda tizimda <code class="bg-gray-900 text-yellow-400 px-1 rounded">/var/log/auth.log</code> manzilida soxta login urinishlari qayd etilgan. 
+                    Sizning vazifangiz: log fayli ichidan <b class="text-white">"CRITICAL"</b> xatolik so'zi qatnashgan barcha qatorlarni topib, ularni <code class="bg-gray-900 text-green-400 px-1 rounded">/home/sandbox/alerts.txt</code> fayliga yo'naltirish (<code class="text-yellow-400">&gt;</code> orqali).
+                </p>
+            </div>
+
+            <div id="validationResult" class="hidden border p-4 rounded transition-all duration-300">
+                </div>
+        </div>
+
+        <div class="w-1/2 bg-black relative flex flex-col">
+            <div class="bg-gray-900/60 px-4 py-1 text-xs text-gray-500 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <span>Terminal Oynasi (alpine-container-isolated)</span>
+                <span class="text-green-500 animate-pulse">● SECURE SHELL ON</span>
+            </div>
+            <div id="terminal" class="flex-1 p-3 bg-black"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xterm@4.19.0/lib/xterm.js"></script>
+<script>
+    // Xterm Terminal interfeysini sozlash
+    const term = new Terminal({
+        cursorBlink: true,
+        fontSize: 14,
+        fontFamily: 'Courier New, monospace',
+        theme: {
+            background: '#000000',
+            foreground: '#4ade80', // Green text
+            cursor: '#4ade80'
+        }
+    });
+    
+    term.open(document.getElementById('terminal'));
+    term.writeln('Connecting to secure ShadowShell sandbox sandbox...');
+    term.write('\r\n\x1b[33m[root@shadowshell-sandbox ~]# \x1b[0m');
+
+    // Terminalga yozish logikasi simulyatsiyasi (Buni backend xavfsiz websocket yoki views.py orqali boshqaradi)
+    let currentInput = '';
+    term.onData(e => {
+        switch (e) {
+            case '\r': // Enter bosilganda
+                term.writeln('');
+                // Bu yerda backendga buyruq yuborilishi kerak
+                term.write('\r\n\x1b[33m[root@shadowshell-sandbox ~]# \x1b[0m');
+                currentInput = '';
+                break;
+            case '\u007F': // Backspace
+                if (currentInput.length > 0) {
+                    currentInput = currentInput.slice(0, -1);
+                    term.write('\b \b');
+                }
+                break;
+            default:
+                currentInput += e;
+                term.write(e);
+        }
+    });
+
+    // Run tugmasi bosilganda xavfsiz Docker Engine validation qismini simulyatsiya qilish va chiqarish
+    document.getElementById('runValidationBtn').addEventListener('click', function() {
+        const resultDiv = document.getElementById('validationResult');
+        const badge = document.getElementById('statusBadge');
+        
+        badge.innerText = "TEKSHIRILMOQDA...";
+        badge.className = "text-xs bg-blue-950 text-blue-500 border border-blue-800 px-3 py-1 rounded tracking-widest uppercase";
+
+        // Ajax orqali Django Docker validator chaqirilgandagi simulyatsiya logikasi:
+        setTimeout(() => {
+            resultDiv.classList.remove('hidden');
+            // Muvaffaqiyatli ssenariy:
+            resultDiv.className = "border border-green-500/40 bg-green-950/20 p-4 rounded block";
+            resultDiv.innerHTML = `<h4 class="text-green-400 font-bold text-sm">✓ ACCESS GRANTED</h4>
+                                   <p class="text-xs text-gray-400 mt-1">Docker konteyner tekshirildi. alerts.txt fayli to'g'ri yaratilgan va ma'lumotlar filtrlab o'tkazilgan. +25 XP hisobingizga qo'shildi!</p>`;
+            
+            badge.innerText = "MUVAFFAQIYATLI";
+            badge.className = "text-xs bg-green-950 text-green-500 border border-green-800 px-3 py-1 rounded tracking-widest uppercase";
+        }, 1500);
+    });
+</script>
+{% endblock %}

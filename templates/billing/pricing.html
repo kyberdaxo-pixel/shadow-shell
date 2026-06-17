@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Premium Tariflar - ShadowShell{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; margin-top: 30px;">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 32px; margin-bottom: 10px;">🛡️ Premium Kiber-Imkoniyatlar</h1>
+        <p style="color: var(--text-muted);">ShadowShell xavfsizlik laboratoriyasining barcha resurslarini oching</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 15fr)); gap: 30px;">
+        
+        <div class="cyber-card" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;">
+            <div>
+                <h3 style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;">Script Kiddie</h3>
+                <div style="font-size: 36px; font-weight: 800; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">0 <span style="font-size: 16px; color: var(--text-muted);">UZS / oy</span></div>
+                <hr style="border-color: var(--border-color); margin-bottom: 20px;">
+                <ul style="list-style: none; padding: 0; color: var(--text-main); font-size: 14px;">
+                    <li style="margin-bottom: 12px;"><i class="fas fa-check" style="color: var(--primary); margin-right: 8px;"></i> Asosiy kiber-kurslar</li>
+                    <li style="margin-bottom: 12px;"><i class="fas fa-check" style="color: var(--primary); margin-right: 8px;"></i> Cheklangan Sandbox terminali</li>
+                    <li style="margin-bottom: 12px; color: var(--text-muted);"><i class="fas fa-times" style="color: var(--danger); margin-right: 8px;"></i> Premium labaratoriyalar</li>
+                </ul>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" disabled>Hozirgi Tarif</button>
+        </div>
+
+        <div class="cyber-card" style="border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); display: flex; flex-direction: column; justify-content: space-between; min-height: 400px; position: relative;">
+            <span style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: #000000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">POPULAR</span>
+            <div>
+                <h3 style="color: var(--primary); font-size: 18px; margin-bottom: 10px;">Elite Hacker</h3>
+                <div style="font-size: 36px; font-weight: 800; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">99,000 <span style="font-size: 16px; color: var(--text-muted);">UZS / oy</span></div>
+                <hr style="border-color: var(--border-color); margin-bottom: 20px;">
+                <ul style="list-style: none; padding: 0; color: var(--text-main); font-size: 14px;">
+                    <li style="margin-bottom: 12px;"><i class="fas fa-check" style="color: var(--primary); margin-right: 8px;"></i> To'liq kiber-kurslar va CTF</li>
+                    <li style="margin-bottom: 12px;"><i class="fas fa-check" style="color: var(--primary); margin-right: 8px;"></i> 24/7 To'liq Sandbox Port Scanner terminali</li>
+                    <li style="margin-bottom: 12px;"><i class="fas fa-check" style="color: var(--primary); margin-right: 8px;"></i> Maxsus yutuqlar va sertifikatlar</li>
+                </ul>
+            </div>
+            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 20px;">⚡ PREMIUMGA O'TISH</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

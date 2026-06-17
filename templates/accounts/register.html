@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Ro'yxatdan o'tish - ShadowShell{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 60px auto 20px auto;">
+    <div class="cyber-card" style="border-top: 3px solid var(--accent);">
+        <h2 style="font-size: 26px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-user-shield" style="color: var(--accent);"></i> ShadowShell
+        </h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; font-family: 'JetBrains Mono', monospace;">
+            // SECURITY_ACCESS: Yangi profil yaratish
+        </p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" style="display: flex; align-items: center; gap: 6px;">
+                        {% if 'user' in field.name %}<i class="fas fa-user"></i>
+                        {% elif 'email' in field.name %}<i class="fas fa-envelope"></i>
+                        {% elif 'password' in field.name or 'parol' in field.name %}<i class="fas fa-key"></i>
+                        {% endif %}
+                        {{ field.label }}
+                    </label>
+                    
+                    {# Djangodagi standart inputlarga CSS klassini majburlab yuklaymiz #}
+                    <div class="cyber-input-wrapper">
+                        {{ field }}
+                    </div>
+                    
+                    {% if field.errors %}
+                        <span style="color: var(--danger); font-size: 12px; font-family: 'JetBrains Mono', monospace;">
+                            {{ field.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 12px;">
+                <i class="fas fa-user-plus"></i> TIZIMGA KIRISH
+            </button>
+        </form>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+        
+        <p style="text-align: center; font-size: 14px; color: var(--text-muted);">
+            Akkauntingiz bormi? <a href="{% url 'accounts:login' %}" style="color: var(--accent); font-weight: bold;">Kirish</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    /* Django generatsiya qilgan inputlarga avtomat kiber-stil berish */
+    .cyber-input-wrapper input {
+        width: 100%;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        font-size: 14px;
+        font-family: 'JetBrains Mono', monospace;
+        transition: all 0.25s ease;
+    }
+    .cyber-input-wrapper input:focus {
+        outline: none !important;
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 10px var(--accent-glow) !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kirish - ShadowShell{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">🛡️</div>
+                <h1>Shadow<span class="text-accent">Shell</span></h1>
+                <p class="auth-subtitle">Tizimga qaytish</p>
+            </div>
+
+            <form method="post" class="auth-form" autocomplete="off">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Username yoki Email
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <div class="form-error">
+                        {% for error in form.username.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-key"></i> Parol
+                    </label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                    <div class="form-error">
+                        {% for error in form.password.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="form-error form-error-global">
+                    {% for error in form.non_field_errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> KIRISH
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Yangi foydalanuvchimisiz? <a href="{% url 'accounts:register' %}" class="text-accent">Ro'yxatdan o'ting</a></p>
+            </div>
+
+            <div class="auth-decoration">
+                <div class="matrix-line"></div>
+                <div class="matrix-line delay-1"></div>
+                <div class="matrix-line delay-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

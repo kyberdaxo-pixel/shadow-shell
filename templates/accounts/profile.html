@@ -1,0 +1,444 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Profil - {{ user.username }} - ShadowShell{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Kiber Profil Sahifasi Stillari */
+    :root {
+        --cyber-bg: #050b14;
+        --cyber-panel: #0a111a;
+        --neon-green: #00ff66;
+        --neon-cyan: #00f0ff;
+        --neon-purple: #bd00ff;
+        --text-muted: #64748b;
+        --border-color: #0f3d3e;
+    }
+
+    .profile-page {
+        background: var(--cyber-bg);
+        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+        padding: 40px 20px;
+        min-height: 100vh;
+    }
+
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    @media (min-width: 992px) {
+        .profile-container {
+            grid-template-columns: 350px 1fr;
+        }
+        .profile-header-card {
+            grid-column: 1 / -1;
+        }
+    }
+
+    /* Kiber Panel */
+    .cyber-card {
+        background: var(--cyber-panel);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cyber-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+    }
+
+    .cyber-card h2 {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.3rem;
+        color: #fff;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(15, 61, 62, 0.4);
+        padding-bottom: 10px;
+    }
+
+    /* Profile Header Layout */
+    .profile-header-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+        .profile-header-card {
+            flex-direction: row;
+            text-align: left;
+            padding: 35px;
+        }
+    }
+
+    .profile-avatar-large {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        border: 3px solid var(--neon-green);
+        box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #111c2a;
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--neon-green);
+        overflow: hidden;
+    }
+
+    .profile-avatar-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-info h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 5px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .profile-rank {
+        color: var(--neon-cyan);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .profile-email {
+        color: var(--text-muted);
+        margin-bottom: 12px;
+    }
+
+    .profile-bio {
+        background: rgba(0, 240, 255, 0.05);
+        border-left: 3px solid var(--neon-cyan);
+        padding: 10px 15px;
+        border-radius: 0 4px 4px 0;
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        max-width: 700px;
+    }
+
+    .profile-github {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #24292e;
+        color: #fff;
+        padding: 6px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+
+    .profile-github:hover {
+        background: #fff;
+        color: #24292e;
+        box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    /* Kiber Formalar */
+    .profile-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .profile-form .form-label {
+        display: block;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--neon-cyan);
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Input stillari Djangodan keladigan form elementlari uchun */
+    .profile-form input[type="text"],
+    .profile-form input[type="url"],
+    .profile-form textarea {
+        width: 100%;
+        background: #060d16;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 12px;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        transition: 0.3s;
+    }
+
+    .profile-form input:focus,
+    .profile-form textarea:focus {
+        outline: none;
+        border-color: var(--neon-green);
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.15);
+    }
+
+    /* File input dizayni */
+    .profile-form input[type="file"] {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Yutuqlar Grid */
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .achievement-card {
+        background: #0d1722;
+        border: 1px solid rgba(15, 61, 62, 0.5);
+        border-radius: 6px;
+        padding: 20px;
+        text-align: center;
+        transition: 0.3s;
+    }
+
+    .achievement-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--neon-purple);
+        box-shadow: 0 5px 15px rgba(189, 0, 255, 0.15);
+    }
+
+    .achievement-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .achievement-name {
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .achievement-desc {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    /* Kirish Tarixi Terminal Ko'rinishi */
+    .login-history {
+        background: #04080e;
+        border: 1px solid #0f3d3e;
+        border-radius: 6px;
+        padding: 15px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .login-entry {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid rgba(15, 61, 62, 0.2);
+    }
+
+    .login-entry:last-child {
+        border-bottom: none;
+    }
+
+    .login-entry.success {
+        color: var(--neon-green);
+    }
+
+    .login-entry.failed {
+        color: #ff3366;
+    }
+
+    .login-ip {
+        font-weight: bold;
+    }
+
+    .login-time {
+        color: var(--text-muted);
+    }
+
+    /* Xatolik paneli */
+    .form-error {
+        background: rgba(255, 51, 102, 0.1);
+        border: 1px solid #ff3366;
+        color: #ff3366;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Kiber Tugma */
+    .btn-cyber {
+        background: transparent;
+        color: var(--neon-green);
+        border: 1px solid var(--neon-green);
+        padding: 10px 25px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: 0.3s;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-cyber:hover {
+        background: var(--neon-green);
+        color: #000;
+        box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-container">
+        
+        <div class="cyber-card profile-header-card">
+            <div class="profile-avatar-container">
+                <div class="profile-avatar-large">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="avatar">
+                    {% else %}
+                        <span>{{ user.username.0|upper }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="profile-info">
+                <h1>{{ user.username }}</h1>
+                <p class="profile-rank">🛡️ {{ profile.get_rank_display }} • Level {{ profile.level }}</p>
+                <p class="profile-email"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                
+                {% if profile.bio %}
+                    <p class="profile-bio">{{ profile.bio }}</p>
+                {% else %}
+                    <p class="profile-bio" style="color: var(--text-muted); font-style: italic;">Hali o'zi haqida ma'lumot kiritmagan...</p>
+                {% endif %}
+                
+                {% if profile.github_url %}
+                    <a href="{{ profile.github_url }}" target="_blank" rel="noopener" class="profile-github">
+                        <i class="fab fa-github"></i> GitHub Profilingiz
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="cyber-card">
+            <h2><i class="fas fa-user-pen" style="color: var(--neon-cyan)"></i> Sozlamalar</h2>
+            <form method="post" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Shaxsiy Bio</label>
+                    {{ form.bio }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">GitHub Havolasi</label>
+                    {{ form.github_url }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Profil Avatari</label>
+                    <div style="margin-top: 5px;">
+                        {{ form.avatar }}
+                    </div>
+                </div>
+
+                {% if form.errors %}
+                <div class="form-error">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                        <div><strong>{{ field|capfirst }}:</strong> {{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn-cyber" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-save"></i> O'zgarishlarni saqlash
+                </button>
+            </form>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 30px;">
+            
+            <div class="cyber-card">
+                <h2><i class="fas fa-trophy" style="color: #eab308"></i> Qo'lga kiritilgan yutuqlar ({{ achievements.count }})</h2>
+                <div class="achievements-grid">
+                    {% for ua in achievements %}
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            {% if ua.achievement.icon %}{{ ua.achievement.icon }}{% else %}🏆{% endif %}
+                        </div>
+                        <div class="achievement-name">{{ ua.achievement.name }}</div>
+                        <div class="achievement-desc">{{ ua.achievement.description }}</div>
+                    </div>
+                    {% empty %}
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">
+                        <i class="fas fa-circle-info" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
+                        Hozircha hech qanday yutuq ochilmagan. Topshiriqlarni bajarishda davom eting!
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="cyber-card">
+                <h2><i class="fas fa-shield-halved" style="color: var(--neon-cyan)"></i> Xavfsizlik loglari (Kirish tarixi)</h2>
+                <div class="login-history">
+                    {% for log in login_logs %}
+                    <div class="login-entry {% if log.success %}success{% else %}failed{% endif %}">
+                        <div>
+                            <span style="margin-right: 10px;">{% if log.success %}🟢 SUCCESS{% else %}🔴 FAILED{% endif %}</span>
+                            <span class="login-ip">IP: {{ log.ip_address }}</span>
+                        </div>
+                        <span class="login-time">[{{ log.timestamp|date:"d.m.Y H:i" }}]</span>
+                    </div>
+                    {% empty %}
+                    <p style="color: var(--text-muted); text-align: center; padding: 10px;">Hech qanday log topilmadi.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

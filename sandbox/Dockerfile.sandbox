@@ -1,0 +1,31 @@
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    bash \
+    coreutils \
+    grep \
+    sed \
+    awk \
+    findutils \
+    net-tools \
+    curl \
+    wget \
+    nmap \
+    procps \
+    util-linux \
+    shadow \
+    tree
+
+RUN adduser -D -s /bin/bash sandboxuser
+
+WORKDIR /home/sandboxuser
+
+RUN mkdir -p /home/sandboxuser/workspace && \
+    chown -R sandboxuser:sandboxuser /home/sandboxuser
+
+COPY runner.sh /usr/local/bin/runner.sh
+RUN chmod +x /usr/local/bin/runner.sh
+
+USER sandboxuser
+
+CMD ["/bin/bash"]

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ quest.title }} - ShadowShell{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quest-page {
+        background: #050b14;
+        min-height: 100vh;
+        padding: 40px 20px;
+        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+    }
+    .quest-box {
+        max-width: 900px;
+        margin: 0 auto;
+        background: #0a111a;
+        border: 1px solid #0f3d3e;
+        border-radius: 8px;
+        padding: 35px;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
+        position: relative;
+    }
+    .quest-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #00f0ff, #bd00ff);
+    }
+    .quest-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(15, 61, 62, 0.5);
+    }
+    .quest-title {
+        font-size: 2rem;
+        color: #fff;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 15px;
+    }
+    .xp-tag {
+        color: #00ff66;
+        font-weight: bold;
+        background: rgba(0, 255, 102, 0.1);
+        padding: 4px 12px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 255, 102, 0.2);
+    }
+    .section-title {
+        font-family: 'JetBrains Mono', monospace;
+        color: #00f0ff;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .desc-text {
+        line-height: 1.7;
+        color: #cbd5e1;
+        font-size: 1rem;
+    }
+    .code-block {
+        background: #04080e;
+        border: 1px solid rgba(15, 61, 62, 0.8);
+        border-radius: 6px;
+        padding: 20px;
+        color: #00ff66;
+        font-family: 'JetBrains Mono', monospace;
+        overflow-x: auto;
+        margin-top: 10px;
+    }
+    /* Chiroyli Video Dars Tugmasi */
+    .btn-video {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #e11d48;
+        color: #fff;
+        padding: 14px 28px;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 15px;
+        box-shadow: 0 0 15px rgba(225, 29, 72, 0.4);
+        transition: 0.3s ease;
+    }
+    .btn-video:hover {
+        background: #f43f5e;
+        box-shadow: 0 0 25px rgba(244, 63, 94, 0.6);
+        transform: scale(1.02);
+    }
+    /* Pastki Katta Bajarish Tugmasi */
+    .action-zone {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(15, 61, 62, 0.5);
+        text-align: center;
+    }
+    .btn-execute {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #00ff66;
+        color: #000;
+        padding: 16px 45px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: 4px;
+        box-shadow: 0 0 25px rgba(0, 255, 102, 0.4);
+        transition: 0.3s;
+    }
+    .btn-execute:hover {
+        background: #fff;
+        box-shadow: 0 0 35px rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+    .completed-banner {
+        background: rgba(0, 255, 102, 0.08);
+        border: 1px solid #00ff66;
+        color: #00ff66;
+        padding: 15px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-family: 'JetBrains Mono', monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quest-page">
+    <div class="quest-box">
+        
+        <div class="quest-meta">
+            <a href="{% url 'courses:course_detail' course.slug %}" style="color: #64748b; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Kurs sahifasiga qaytish
+            </a>
+            <span class="xp-tag">⚡ {{ quest.xp_reward }} XP</span>
+        </div>
+
+        <h1 class="quest-title">🎯 Topshiriq: {{ quest.title }}</h1>
+        
+        <div class="section-title"><i class="fas fa-terminal"></i> Topshiriq tavsifi</div>
+        <div class="desc-text">
+            {{ quest.description|linebreaks }}
+        </div>
+
+        {% if quest.hint_code %}
+        <div class="section-title"><i class="fas fa-lightbulb"></i> Kod namunasi / Maslahat</div>
+        <pre class="code-block"><code>{{ quest.hint_code }}</code></pre>
+        {% endif %}
+
+        {% if quest.video_url %}
+        <div class="section-title"><i class="fas fa-video"></i> Mavzuga oid video darslik</div>
+        <p class="desc-text" style="font-size: 0.9rem; color: #64748b;">Topshiriqni bajarishga qiynalsangiz, videoni diqqat bilan tomosha qiling:</p>
+        <a href="{{ quest.video_url }}" target="_blank" rel="noopener" class="btn-video">
+            <i class="fas fa-play"></i> Video darsni tomosha qilish
+        </a>
+        {% endif %}
+
+        <div class="action-zone">
+            {% if progress.is_completed %}
+                <div class="completed-banner">
+                    <i class="fas fa-check-circle"></i> SIZ BU TOPSHIRIQNI MUVAFFAQIYATLI BAJARGANSIZ! (+{{ quest.xp_reward }} XP olindi)
+                </div>
+            {% else %}
+                <a href="/accounts/cyber-terminal/?quest_id={{ quest.id }}" class="btn-execute">
+                    <i class="fas fa-laptop-code"></i> Topshiriqni terminalda bajarish →
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
